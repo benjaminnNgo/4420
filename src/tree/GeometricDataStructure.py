@@ -8,7 +8,7 @@ from tree.utils import euclidean_distance
 
 class GeometricDataStructure:
     def __init__(self,
-                 points:List[list],
+                 points:List[List],
                  dimension : int,
                  dist_function : Optional[Callable] = None 
                  ):
@@ -16,14 +16,17 @@ class GeometricDataStructure:
         self.dimension = dimension
         self.dist_function = euclidean_distance if dist_function is None else dist_function
 
-    def insert(): #@TODO: define parameters here
+    def insert(point:List[List]): 
         raise Exception("This function need to be defined in subclass")
     
-    def get_knn(): #@TODO: define parameters here
+    def get_knn(point: List[List]): 
         raise Exception("This function need to be defined in subclass")
     
-    def delete(): #@TODO: define parameters here
+    def delete(point : List[List]): 
         raise Exception("This function need to be defined in subclass")
     
-    def get_nearest(): #@TODO: define parameters here
+    def get_nearest(point : List[List]): 
+        raise Exception("This function need to be defined in subclass")
+    
+    def query_range(center_point: List[List], radius:int):
         raise Exception("This function need to be defined in subclass")
