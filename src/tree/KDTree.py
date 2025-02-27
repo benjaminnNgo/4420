@@ -19,6 +19,23 @@ class KDTreeNode:
         self.left = left
         
 class KDTreee (GeometricDataStructure):
+    def __init__(self, points, dimension, dist_function = None):
+        super().__init__(points, dimension, dist_function)
+
+
+    def _construct_tree(self,points: List[List], depth = 0):
+        if not points:
+            return None
+        
+        compared_axis = depth % self.dimension
+        sorted_points = sorted(points, key= lambda point: point[compared_axis])
+        median_point_idx = sorted_points[len(sorted_points)//2]
+        new_node = KDTreeNode(np.ndarray(coordinate= sorted_points[median_point_idx]), compare_axis= compared_axis)
+        new_node.left = self._construct_tree(points= points[:median_point_idx], depth= depth+1)
+        new_node.right = self._construct_tree(points= points[median_point_idx+1:], depth= depth+1)
+        return new_node
+        
+
     def insert(point:List[List]): 
         raise Exception("This function need to be defined in subclass")
     
