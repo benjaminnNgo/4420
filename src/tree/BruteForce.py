@@ -8,17 +8,9 @@ from typing import *
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from tree import GeometricDataStructure
 
-class KDTreeNode:
-    def __init__(self,coordinate:np.ndarray
-                 ,compare_axis: int, 
-                 left: Optional["KDTreeNode"] = None,
-                 right: Optional["KDTreeNode"] = None):
-        self.coordinate = coordinate
-        self.compare_axis = compare_axis
-        self.right = right
-        self.left = left
+
         
-class KDTreee (GeometricDataStructure):
+class BruteForce (GeometricDataStructure):
     def insert(point:List[List]): 
         raise Exception("This function need to be defined in subclass")
     
