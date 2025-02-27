@@ -30,3 +30,4 @@ class GeometricDataStructure:
     
     def query_range(center_point: List[List], radius:int):
         raise Exception("This function need to be defined in subclass")
+    
