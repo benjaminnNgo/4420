@@ -16,18 +16,18 @@ class GeometricDataStructure:
         self.dimension = dimension
         self.dist_function = euclidean_distance if dist_function is None else dist_function
 
-    def insert(point:List[List]): 
+    def insert(self,point:List[List]): 
         raise Exception("This function need to be defined in subclass")
     
-    def get_knn(point: List[List]): 
+    def get_knn(self,point: List[List]): 
         raise Exception("This function need to be defined in subclass")
     
-    def delete(point : List[List]): 
+    def delete(self,point : List[List]): 
         raise Exception("This function need to be defined in subclass")
     
-    def get_nearest(point : List[List]): 
+    def get_nearest(self,point : List[List]): 
         raise Exception("This function need to be defined in subclass")
     
-    def query_range(center_point: List[List], radius:int):
+    def query_range(self,center_point: List[List], radius:int):
         raise Exception("This function need to be defined in subclass")
     
