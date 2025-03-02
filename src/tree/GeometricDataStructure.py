@@ -8,8 +8,8 @@ from tree.utils import euclidean_distance
 
 class GeometricDataStructure:
     def __init__(self,
-                 points:List[List],
                  dimension : int,
+                 points:Optional[List[List]] = None,
                  dist_function : Optional[Callable] = None 
                  ):
         self.points = points
@@ -19,7 +19,7 @@ class GeometricDataStructure:
     def insert(self,point:List[List]): 
         raise Exception("This function need to be defined in subclass")
     
-    def get_knn(self,point: List[List]): 
+    def get_knn(self,point: List[List], k:int): 
         raise Exception("This function need to be defined in subclass")
     
     def delete(self,point : List[List]): 

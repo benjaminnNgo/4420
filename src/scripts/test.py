@@ -6,7 +6,17 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from tree import KDTree
 from tree.utils import euclidean_distance
 
-test_tree = KDTree([[1,2],[2,3],[3,4],[5,6],[5,3]],2)
-print(test_tree.root.right.coordinate)
+#[1,2],[2,3],[3,4],[5,6],[5,3]]
+test_tree = KDTree(2)
+test_tree.insert([1,2])
+test_tree.insert([2,3])
+test_tree.insert([0,3])
+test_tree.insert([3,5])
 
-print(euclidean_distance(np.array([1,2]), np.array([3,4])))
+
+
+print(test_tree.root.coordinate)
+print(test_tree.root.right.right.coordinate)
+
+
+# print(euclidean_distance(np.array([1,2]), np.array([3,4])))

@@ -11,8 +11,10 @@ from tree import GeometricDataStructure
 
         
 class BruteForce (GeometricDataStructure):
-    def __init__(self, points, dimension, dist_function = None):
-        super().__init__(points, dimension, dist_function)
+    def __init__(self, dimension : int,
+                 points:Optional[List[List]] = None,
+                 dist_function : Optional[Callable] = None):
+        super().__init__(dimension,points, dist_function)
         
         self.points = self._to_set_of_tuple(self.points)
     

@@ -12,19 +12,27 @@ class KDTreeNode:
     def __init__(self,coordinate:np.array,
                  compare_axis: int, 
                  left: Optional["KDTreeNode"] = None,
-                 right: Optional["KDTreeNode"] = None):
+                 right: Optional["KDTreeNode"] = None
+                ):
         self.coordinate = coordinate
         self.compare_axis = compare_axis
         self.right = right
         self.left = left
         
 class KDTree (GeometricDataStructure):
-    def __init__(self, points, dimension, dist_function = None):
-        super().__init__(points, dimension, dist_function)
+    def __init__(self,
+                 dimension : int,
+                 points:Optional[List[List]] = None,
+                 dist_function : Optional[Callable] = None 
+                ):
+        super().__init__(dimension,points,dist_function)
         self.root = self._construct_tree(points=points, depth=0)
 
 
-    def _construct_tree(self,points: List[List], depth = 0):
+    def _construct_tree(self,
+                        points: List[List], 
+                        depth = 0
+                        ):
         if not points:
             return None
         
@@ -36,20 +44,48 @@ class KDTree (GeometricDataStructure):
         new_node.right = self._construct_tree(points= sorted_points[median_point_idx+1:], depth= depth+1)
         return new_node
         
+    def _insert(self, 
+                root:KDTreeNode, 
+                point:List[List],
+                depth:int = 0
+                ):
+        compared_axis = depth % self.dimension
+        dx =  point[compared_axis] - root.coordinate[compared_axis]
+        if dx > 0:
+            if root.right is None:
+                root.right =  KDTreeNode(coordinate= np.array(point), compare_axis= (depth+1) % self.dimension)
+            else:
+                self._insert(root= root.right,point=point,depth=depth+1)
+        else:
 
-    def insert(point:List[List]): 
+            if root.left is None:
+                root.left =  KDTreeNode(coordinate= np.array(point), compare_axis= (depth+1) % self.dimension)
+            else:
+                self._insert(root= root.left,point=point,depth=depth+1)
+
+
+
+    def insert(self,
+               point:List[List]
+               ): 
+        if self.root is None:
+            self.root = KDTreeNode(coordinate= np.array(point), compare_axis= 0)
+        else:
+            self._insert(root= self.root, point = point,depth = 0)
+
+    def delete(self,point : List[List]): 
+        # @TODO: If delete leaf node, it is easy. But if delete internal node, we may need to re-build the enture right subtree
+        raise Exception("This function need to be defined in subclass")
+
+    
+    def get_knn(self,point: List[List]): 
         raise Exception("This function need to be defined in subclass")
     
-    def get_knn(point: List[List]): 
+    
+    def get_nearest(self,point : List[List], k:int): 
         raise Exception("This function need to be defined in subclass")
     
-    def delete(point : List[List]): 
-        raise Exception("This function need to be defined in subclass")
-    
-    def get_nearest(point : List[List]): 
-        raise Exception("This function need to be defined in subclass")
-    
-    def query_range(center_point: List[List], radius:int):
+    def query_range(self,center_point: List[List], radius:int):
         raise Exception("This function need to be defined in subclass")
     
    
