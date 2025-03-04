@@ -4,7 +4,12 @@ import sys
 
 # Edit path to import from different module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from tree.utils import euclidean_distance
+from tree.utils import euclidean_squ_distance
+
+"""
+Authors: Tran Gia Bao Ngo
+Overview: Base class for geometric data structure
+"""
 
 class GeometricDataStructure:
     def __init__(self,
@@ -14,7 +19,7 @@ class GeometricDataStructure:
                  ):
         self.points = points
         self.dimension = dimension
-        self.dist_function = euclidean_distance if dist_function is None else dist_function
+        self.dist_function = euclidean_squ_distance if dist_function is None else dist_function
 
     def insert(self,point:List[List]): 
         raise Exception("This function need to be defined in subclass")
