@@ -3,20 +3,34 @@ import sys
 import numpy as np
 # Edit path to import from different module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from tree import KDTree
-from tree.utils import euclidean_distance
-
-#[1,2],[2,3],[3,4],[5,6],[5,3]]
-test_tree = KDTree(2)
-test_tree.insert([1,2])
-test_tree.insert([2,3])
-test_tree.insert([0,3])
-test_tree.insert([3,5])
+from tree import KDTree, BruteForce
+from tree.utils import euclidean_squ_distance
 
 
+# print(euclidean_squ_distance(np.array([1,2]), np.array([3,4])))
 
-print(test_tree.root.coordinate)
-print(test_tree.root.right.right.coordinate)
+# [1,2],[2,3],[3,4],[5,6],[5,3]]
+points = [
+        [1, 2], [3, 4], [5, 6], [7, 8], [2, 3],
+        [6, 7], [8, 9], [3, 5], [4, 6], [5, 8]
+    ]
+test_tree = KDTree(dimension=2, points=points)
+test_baseline = BruteForce(dimension=2, points=points)
+result = test_tree.get_knn([9, 9],2)
+print(result)
+print(test_baseline.points)
+test_baseline.delete([3,4])
+print(test_baseline.points)
+test_baseline.insert([3,4])
+print(test_baseline.points)
+
+print(test_baseline.get_nearest([9, 9]))
+print(test_baseline.get_knn([9, 9],2))
+
+
+
+# print(test_tree.root.coordinate)
+# print(test_tree.root.right.right.coordinate)
 
 
 # print(euclidean_distance(np.array([1,2]), np.array([3,4])))
