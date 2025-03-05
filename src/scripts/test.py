@@ -9,6 +9,7 @@ from tree.utils import euclidean_squ_distance
 
 # print(euclidean_squ_distance(np.array([1,2]), np.array([3,4])))
 
+print((np.array([3,4])).shape)
 # [1,2],[2,3],[3,4],[5,6],[5,3]]
 points = [
         [1, 2], [3, 4], [5, 6], [7, 8], [2, 3],
