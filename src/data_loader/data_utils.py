@@ -76,22 +76,13 @@ def data_loader(data_name = "cifar"):
     data = None
     # Open the HDF5 file in read mode
     with h5py.File(data_path, "r") as datafile:
-        # List all groups and datasets in the file
-        # print(list(datafile.keys()))
-        
-        # Access a dataset
         dataset = datafile["dataset"]
         queries = datafile['query']
         groundtruth_queries = datafile['groundtruth']
         random_queries = datafile['randomquery']
         groundtruth_random_queries = datafile['groundtruth_randomquery']
 
-        dataset = list(dataset[:])
-
-        # print(list(dataset[:]))
-        # print(type(dataset[0]))
-        # print(len(dataset))
-        # print(dataset[0].shape[0])    
+        dataset = list(dataset[:])   
 
         data = GeometricData(
             dim=dataset[0].shape[0],

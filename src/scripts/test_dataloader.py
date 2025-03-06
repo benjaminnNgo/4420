@@ -4,6 +4,8 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from data_loader import data_loader
+from tree import KDTree, BruteForce
+from tree.utils import euclidean_squ_distance
 
 # # Open the HDF5 file in read mode
 # with h5py.File("datasets/notre.hdf5", "r") as f:
@@ -17,3 +19,7 @@ from data_loader import data_loader
 data = data_loader()
 print(data.dim)
 print(len(data.points[0]))
+
+test_tree = KDTree(dimension=data.dim, points=data.points)
+
+point = test_tree.get_nearest(data.queries[0])
