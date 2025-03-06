@@ -14,25 +14,34 @@ print((type(np.array([3,4]))))
 # [1,2],[2,3],[3,4],[5,6],[5,3]]
 points = [
         [1, 2], [3, 4], [5, 6], [7, 8], [2, 3],
-        [6, 7], [8, 9], [3, 5], [4, 6], [5, 8]
+        [6, 7], [8, 9], [3, 5], [4, 6], [5, 8],
+        [0,0],[10,1]
+
+        # [1,2],[2,3],[3,4],[5,6],[5,3]
     ]
 
 for i in range(len(points)):
     points[i] = np.array(points[i])
 test_tree = KDTree(dimension=2, points=points)
 test_baseline = BruteForce(dimension=2, points=points)
-result = test_tree.get_knn(np.array([9, 9]),2)
-print(result)
-print(test_baseline.points)
-test_baseline.delete(np.array([3,4]))
-print(test_baseline.points)
-test_baseline.insert(np.array([3,4]))
-print(test_baseline.points)
+# result = test_tree.get_knn(np.array([9, 9]),2)
+# print(result)
+# print(test_baseline.points)
+# test_baseline.delete(np.array([3,4]))
+# print(test_baseline.points)
+# test_baseline.insert(np.array([3,4]))
+# print(test_baseline.points)
 
-print(test_baseline.get_nearest(np.array([9, 9])))
-print(test_baseline.get_knn(np.array([9, 9]),2))
+# print(test_baseline.get_nearest(np.array([9, 9])))
+# print(test_baseline.get_knn(np.array([9, 9]),2))
 
 
+
+# print(test_tree.root.coordinate)
+test_tree.print_tree()
+print("========")
+test_tree.delete(np.array([3,4]))
+test_tree.print_tree()
 
 # print(test_tree.root.coordinate)
 # print(test_tree.root.right.right.coordinate)
