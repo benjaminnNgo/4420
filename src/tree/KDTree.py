@@ -38,12 +38,12 @@ class KDTree(GeometricDataStructure):
 
     Args:
         dimension (int): dimension of each point
-        points (List[List]) : list of initial points
+        points (List[np.ndarray]) : list of initial points
         dist_function (function pointer) : function to compute distance between 2 points, by `default` is `euclidean_squ_distance`
     """
     def __init__(self,
                  dimension : int,
-                 points:Optional[List[List]] = None,
+                 points:Optional[List[np.ndarray]] = None,
                  dist_function : Optional[Callable] = None 
                 ):
         super().__init__(dimension,points,dist_function)
@@ -51,13 +51,13 @@ class KDTree(GeometricDataStructure):
 
 
     def _construct_tree(self,
-                        points: List[List], 
+                        points: List[np.ndarray], 
                         depth = 0):
         r"""
         Private function: constructing an tree from scratch given list of points recursively
 
         Args:
-            points (List[List]) : list of points
+            points (List[np.ndarray]) : list of points
             depth (int) : indicate current depth level when call this function. This is used to define which axis to compare
         """
         if not points:
@@ -67,14 +67,14 @@ class KDTree(GeometricDataStructure):
         sorted_points = sorted(points, key= lambda point: point[compared_axis])
         median_point_idx = len(sorted_points)//2 #Get the median node to split list of nodes into 2 approximately equal 2 sublist
         
-        new_node = KDTreeNode(coordinate= np.array(sorted_points[median_point_idx]))
+        new_node = KDTreeNode(coordinate= sorted_points[median_point_idx])
         new_node.left = self._construct_tree(points= sorted_points[:median_point_idx], depth= depth+1)
         new_node.right = self._construct_tree(points= sorted_points[median_point_idx+1:], depth= depth+1)
         return new_node
         
     def _insert(self, 
                 root:KDTreeNode, 
-                point:List[List],
+                point:np.ndarray,
                 depth:int = 0):
         r"""
         Private function: Given current node in a tree and a new point, decide whether to insert into left branch or right branch (recursively)
@@ -82,45 +82,47 @@ class KDTree(GeometricDataStructure):
 
         Args:
             root (KDTreeNode) : current node in the tree
+            point (np.ndarray) : inserting point
             depth (int) : indicate current depth level when call this function. This is used to define which axis to compare
         """
         compared_axis = depth % self.dimension
         dx =  point[compared_axis] - root.coordinate[compared_axis]
         if dx > 0:
             if root.right is None:
-                root.right =  KDTreeNode(coordinate= np.array(point))
+                root.right =  KDTreeNode(coordinate= point)
             else:
                 self._insert(root= root.right,point=point,depth=depth+1)
         else:
 
             if root.left is None:
-                root.left =  KDTreeNode(coordinate= np.array(point))
+                root.left =  KDTreeNode(coordinate= point)
             else:
                 self._insert(root= root.left,point=point,depth=depth+1)
 
 
 
     def insert(self,
-               point:List[List]): 
+               point:np.ndarray): 
         r"""
         Insert a new node to the tree
 
         Args:
-            point (List[List]) : new node
+            point (np.ndarray) : new node
         """
         
         if self.root is None:
-            self.root = KDTreeNode(coordinate= np.array(point), compare_axis= 0)
+            self.root = KDTreeNode(coordinate= point, compare_axis= 0)
         else:
             self._insert(root= self.root, point = point,depth = 0)
 
-    def delete(self,point : List[List]): 
+    def delete(self,
+               point : np.ndarray): 
         # @TODO: If delete leaf node, it is easy. But if delete internal node, we may need to re-build the enture right subtree
         raise Exception("This function need to be defined in subclass")
 
 
     def _get_knn(self, 
-                 point:np.array, 
+                 point:np.ndarray, 
                  compared_node: KDTreeNode, 
                  k: int, 
                  priority_queue: List, 
@@ -130,7 +132,7 @@ class KDTree(GeometricDataStructure):
         Private function: Get k nearest neighbours recursively 
 
         Args:
-            point (np.array) : target point 
+            point (np.ndarray) : target point 
             compared_node (KDTreeNode) : current node in the tree
             k (int) : indicate the number of neighbours to query 
             priority_queue (List): priority queue to keep track of k nearest neighbours 
@@ -177,29 +179,29 @@ class KDTree(GeometricDataStructure):
             return [queue_element[2].coordinate.tolist() for queue_element in sorted(priority_queue, reverse= True)]
     
     def get_knn(self,
-                point: List[List],
+                point: np.ndarray,
                 k:int): 
         r"""
         Get k nearest neighbours 
 
         Args:
-            point (np.array) : target point 
+            point (np.ndarray) : target point 
             k (int) : indicate the number of neighbours to query 
         """
-        return self._get_knn(point = np.array(point), compared_node = self.root, k= k, priority_queue = [])    
+        return self._get_knn(point = point, compared_node = self.root, k= k, priority_queue = [])    
     
     def get_nearest(self,
-                    point : List[List]): 
+                    point : np.ndarray): 
         r"""
         Get the nearest neighbours 
 
         Args:
-            point (np.array) : target point 
+            point (np.ndarray) : target point 
         """
         return self._get_knn(point = np.array(point), compared_node = self.root, k= 1, priority_queue = [])[0]
     
     def query_range(self,
-                    center_point: List[List], 
+                    center_point: np.ndarray, 
                     radius:int):
         # is it the same way with self._get_knn() in the way it traverse the tree. Instead of keeping a priority queue, keeping a list of qualified points
         raise Exception("This function need to be defined in subclass")
