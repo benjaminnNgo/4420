@@ -4,6 +4,7 @@ import numpy as np
 from typing import Optional
 from typing import *
 import heapq
+from collections import deque
 
 # Edit path to import from different module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -99,6 +100,87 @@ class KDTree(GeometricDataStructure):
             else:
                 self._insert(root= root.left,point=point,depth=depth+1)
 
+    def _find_min(self,
+                  node: KDTreeNode,
+                  target_dim: int, 
+                  depth:int = 0):
+        r"""
+        Find j-minimum in `node`'s subtree
+        """
+        curr_node_discriminator  = depth % self.dimension
+        if node is None:
+            return None
+
+        if target_dim == curr_node_discriminator:
+            if node.left is None:
+                return node
+            return self._find_min(node = node.left, target_dim= target_dim, depth= depth + 1 )
+        else:
+            left_min = self._find_min(node.left, target_dim=target_dim, depth=depth + 1)
+            right_min = self._find_min(node.right, target_dim=target_dim, depth=depth + 1)
+            not_none_candidates = [node for node in [node, left_min, right_min] if node is not None] #Filter out left_min and right_min if it is none
+            return min(not_none_candidates, key= lambda node: node.coordinate[target_dim])
+        
+    
+    def _find_max(self,
+                  node: KDTreeNode,
+                  target_dim: int, 
+                  depth:int = 0):
+        r"""
+        Find j-maximum in `node`'s subtree
+        """
+        curr_node_discriminator  = depth % self.dimension
+        if node is None:
+            return None
+
+        if target_dim == curr_node_discriminator:
+            if node.right is None:
+                return node
+            return self._find_max(node = node.right, target_dim= target_dim, depth= depth + 1 )
+        else:
+            left_max = self._find_max(node.left, target_dim=target_dim, depth=depth + 1)
+            right_max = self._find_max(node.right, target_dim=target_dim, depth=depth + 1)
+            not_none_candidates = [node for node in [node, left_max, right_max] if node is not None] #Filter out left_min and right_min if it is none
+            return max(not_none_candidates, key= lambda node: node.coordinate[target_dim])
+        
+    def _delete(self,
+                root:KDTreeNode, 
+                target_point: np.ndarray,
+                depth: int = 0):
+        if root is None:
+            return None
+        r"""
+        Delete a point from a subtree starting with given root (This function will be call recursively)
+        
+        Args:
+            - root (KDTreeNode) : the starting node of the subtree
+            - target_point (np.ndarray) : point we want to delete
+            - depth (int) : depth of current root, which is used to determine discriminator
+        """        
+        curr_node_discriminator = depth %self.dimension
+        if np.array_equal(target_point, root.coordinate): 
+            # Found the node to delete
+            if root.right is None and root.left is None:
+                return None
+            
+            if root.right is not None:
+                min_node = self._find_min(node= root.right,target_dim=curr_node_discriminator, depth= depth +1)
+                root.coordinate = min_node.coordinate # replace root with j-min from right subtree
+                root.right = self._delete(root= root.right, target_point= min_node.coordinate,depth=depth + 1)  # deleting min_node from right subtree
+            else:
+                max_node = self._find_max(node= root.left,target_dim=curr_node_discriminator, depth= depth +1)
+                root.coordinate = max_node.coordinate # replace root with j-max from left subtree
+                root.left = self._delete(root= root.left, target_point= max_node.coordinate,depth=depth + 1) # deleting max_node from left subtree
+                
+            
+        else:
+            # Not able to find node to delete yet, keep traverse the tree
+            if target_point[curr_node_discriminator] >= root.coordinate[curr_node_discriminator]:
+                root.right = self._delete(root= root.right,target_point= target_point, depth= depth + 1)
+            else:
+                root.left = self._delete(root= root.left,target_point= target_point, depth= depth + 1)
+        
+        return root
 
 
     def insert(self,
@@ -117,8 +199,14 @@ class KDTree(GeometricDataStructure):
 
     def delete(self,
                point : np.ndarray): 
-        # @TODO: If delete leaf node, it is easy. But if delete internal node, we may need to re-build the enture right subtree
-        raise Exception("This function need to be defined in subclass")
+        r"""
+        Delete a given node from the data structure
+
+        Args:
+            point (np.ndarray) : target point
+        """
+        self._delete(root=self.root,target_point=point,depth= 0)
+
 
 
     def _get_knn(self, 
@@ -206,4 +294,24 @@ class KDTree(GeometricDataStructure):
         # is it the same way with self._get_knn() in the way it traverse the tree. Instead of keeping a priority queue, keeping a list of qualified points
         raise Exception("This function need to be defined in subclass")
     
-   
+    def print_tree(self):
+        if self.root is None:
+            return
+        
+        queue = deque([self.root])
+        while queue:
+            level_size = len(queue)
+            for _ in range(level_size):
+                curr_node = queue.popleft()
+                print(curr_node.coordinate,end="")
+                child_indicator = 0
+                if curr_node.left is not None:
+                    queue.append(curr_node.left)
+                    child_indicator +=1
+                
+                if curr_node.right is not None:
+                    queue.append(curr_node.right)
+                    child_indicator +=2
+                print(f"({child_indicator})",end="\t")
+                
+            print()

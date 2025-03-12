@@ -24,7 +24,7 @@ AVAILABLE_DATASETS = {
     'trevi',
     'ukbench'
 }
-DATASETS_DIR = "datasets"
+DATASETS_DIR = os.path.join("src", "datasets") 
 
 class GeometricData:
     def __init__(self,

@@ -8,11 +8,11 @@ import heapq
 # Edit path to import from different module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from tree import GeometricDataStructure
-from utils import euclidean_squared_distance 
+
 
 """
 Authors: Jared Rost
-Overview: Implementation of Ball-tree from the `"Multidimensional binary search trees used for associative searching" <https://doi.org/10.1145/361002.361007>
+Overview: Implementation of Ball*-tree from This implementation follows the Ball*-tree algorithm in: http://arxiv.org/pdf/1511.00628
 """
 
 class BallTreeNode:
@@ -40,9 +40,6 @@ class BallTreeNode:
 class BallTree(GeometricDataStructure):
     r"""Ball*-tree for efficient nearest neighbor search.
 
-    This implementation follows the Ball*-tree algorithm in:
-      http://arxiv.org/pdf/1511.00628
-
     Args:
         dimension (int): dimension of each point.
         points (List[np.ndarray]): list of initial points.
@@ -53,13 +50,10 @@ class BallTree(GeometricDataStructure):
                  dimension: int,
                  points: Optional[List[np.ndarray]] = None,
                  dist_function: Optional[Callable] = None):
-        if dist_function is None:
-            dist_function = euclidean_squared_distance
-        self.dimension = dimension
-        self.dist_function = dist_function
+        # Call the superclass initializer first:
         super().__init__(dimension, points, dist_function)
         self.leaf_size = 1  # you can adjust this threshold if needed
-        self.root = self._construct_tree(points=points, depth=0)
+        self.root = self._construct_tree(points, depth=0)
     
     def _construct_tree(self,
                         points: List[np.ndarray],
@@ -80,8 +74,10 @@ class BallTree(GeometricDataStructure):
         Returns:
             BallTreeNode: the constructed ball tree node.
         """
+        # Base case: no points to split.
         if points is None or len(points) == 0:
             return None
+        # Base case: leaf node.
         if len(points) <= self.leaf_size:
             center = np.mean(points, axis=0)
             radius = np.sqrt(max(self.dist_function(center, pt) for pt in points))
@@ -90,12 +86,15 @@ class BallTree(GeometricDataStructure):
         # Compute the center.
         center = np.mean(points, axis=0)
         pts_array = np.vstack(points)
-        # In case of a single point, return a leaf.
-        if pts_array.shape[0] <= 1:
-            return BallTreeNode(center=center, radius=0.0, points=points)
+
         # Compute covariance and its principal eigenvector.
         cov_matrix = np.cov(pts_array.T)
         eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
+        # NEW: Check for degenerate covariance (low variance in all dimensions).
+        if np.max(eigenvalues) < 1e-6:
+            radius = np.sqrt(max(self.dist_function(center, pt) for pt in points))
+            return BallTreeNode(center=center, radius=radius, points=points)
+        
         principal_idx = np.argmax(eigenvalues)
         principal_axis = eigenvectors[:, principal_idx]
         
@@ -105,11 +104,11 @@ class BallTree(GeometricDataStructure):
         left_points = [pt for pt, proj in zip(points, projections) if proj <= median_proj]
         right_points = [pt for pt, proj in zip(points, projections) if proj > median_proj]
         
-        # Fallback: if one partition is empty, split evenly.
-        if len(left_points) == 0 or len(right_points) == 0:
-            mid = len(points) // 2
-            left_points = points[:mid]
-            right_points = points[mid:]
+        # NEW: If the split does not partition the points, force a leaf.
+        if len(left_points) == 0 or len(right_points) == 0 or \
+           len(left_points) == len(points) or len(right_points) == len(points):
+            radius = np.sqrt(max(self.dist_function(center, pt) for pt in points))
+            return BallTreeNode(center=center, radius=radius, points=points)
         
         radius = np.sqrt(max(self.dist_function(center, pt) for pt in points))
         left_child = self._construct_tree(left_points, depth+1)
@@ -232,11 +231,14 @@ class BallTree(GeometricDataStructure):
         if node is None:
             return priority_queue, tiebreaker
         
+        # Compute the lower bound based on the node's sphere.
         center_distance = np.sqrt(self.dist_function(node.center, point))
         lower_bound = max(0, center_distance - node.radius)
+        # Prune if the lower bound exceeds the worst current candidate.
         if len(priority_queue) == k and lower_bound >= -priority_queue[0][0]:
             return priority_queue, tiebreaker
         
+        # Leaf node: compare all points.
         if node.points is not None:
             for pt in node.points:
                 d = np.sqrt(self.dist_function(pt, point))
@@ -250,6 +252,7 @@ class BallTree(GeometricDataStructure):
                         tiebreaker += 1
             return priority_queue, tiebreaker
         
+        # Internal node: choose the child with the closer sphere.
         children = []
         if node.left is not None:
             left_center_distance = np.sqrt(self.dist_function(node.left.center, point))
@@ -264,24 +267,25 @@ class BallTree(GeometricDataStructure):
             priority_queue, tiebreaker = self._get_knn(point, child, k, priority_queue, depth+1, tiebreaker)
         return priority_queue, tiebreaker
 
-    def get_knn(self,
-                point: np.ndarray,
-                k: int):
+    def get_knn(self, point: np.ndarray, k: int):
         r"""
         Retrieves k nearest neighbors of a target point.
         
         Returns:
-            List[Tuple[float, np.ndarray]]: Sorted list of (distance, point) tuples.
+            List[np.ndarray]: Sorted list of the k nearest points.
         """
         priority_queue, _ = self._get_knn(point, self.root, k, [])
         knn = [(-d, pt) for d, _, pt in priority_queue]
         knn.sort(key=lambda x: x[0])
-        return knn
+        # Return only the points, ignoring distances.
+        return [pt for _, pt in knn]
 
-    def get_nearest(self,
-                    point: np.ndarray):
+    def get_nearest(self, point: np.ndarray):
         r"""
         Retrieves the nearest neighbor of a target point.
+        
+        Returns:
+            np.ndarray: The nearest point.
         """
         knn = self.get_knn(point, k=1)
         return knn[0] if knn else None
