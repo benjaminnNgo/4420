@@ -4,6 +4,8 @@ import numpy as np
 from typing import Optional
 from typing import *
 import heapq
+from collections import deque
+import random
 
 # Edit path to import from different module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -64,13 +66,15 @@ class KDTree(GeometricDataStructure):
             return None
         
         compared_axis = depth % self.dimension #define which axis used to split tree into left and right branches
-        sorted_points = sorted(points, key= lambda point: point[compared_axis])
-        median_point_idx = len(sorted_points)//2 #Get the median node to split list of nodes into 2 approximately equal 2 sublist
-        
-        new_node = KDTreeNode(coordinate= sorted_points[median_point_idx])
-        new_node.left = self._construct_tree(points= sorted_points[:median_point_idx], depth= depth+1)
-        new_node.right = self._construct_tree(points= sorted_points[median_point_idx+1:], depth= depth+1)
+
+        median_point = quickselect_median_point(points,compared_axis) #Get the median node to split list of nodes into 2 approximately equal 2 sublist
+        left = [point for point in points if point[compared_axis] <= median_point[compared_axis] and np.any(point != median_point)]
+        right = [point for point in points if point[compared_axis] > median_point[compared_axis]]
+        new_node = KDTreeNode(coordinate= median_point)
+        new_node.left = self._construct_tree(points= left, depth= depth+1)
+        new_node.right = self._construct_tree(points= right, depth= depth+1)
         return new_node
+
         
     def _insert(self, 
                 root:KDTreeNode, 
@@ -99,6 +103,87 @@ class KDTree(GeometricDataStructure):
             else:
                 self._insert(root= root.left,point=point,depth=depth+1)
 
+    def _find_min(self,
+                  node: KDTreeNode,
+                  target_dim: int, 
+                  depth:int = 0):
+        r"""
+        Find j-minimum in `node`'s subtree
+        """
+        curr_node_discriminator  = depth % self.dimension
+        if node is None:
+            return None
+
+        if target_dim == curr_node_discriminator:
+            if node.left is None:
+                return node
+            return self._find_min(node = node.left, target_dim= target_dim, depth= depth + 1 )
+        else:
+            left_min = self._find_min(node.left, target_dim=target_dim, depth=depth + 1)
+            right_min = self._find_min(node.right, target_dim=target_dim, depth=depth + 1)
+            not_none_candidates = [node for node in [node, left_min, right_min] if node is not None] #Filter out left_min and right_min if it is none
+            return min(not_none_candidates, key= lambda node: node.coordinate[target_dim])
+        
+    
+    def _find_max(self,
+                  node: KDTreeNode,
+                  target_dim: int, 
+                  depth:int = 0):
+        r"""
+        Find j-maximum in `node`'s subtree
+        """
+        curr_node_discriminator  = depth % self.dimension
+        if node is None:
+            return None
+
+        if target_dim == curr_node_discriminator:
+            if node.right is None:
+                return node
+            return self._find_max(node = node.right, target_dim= target_dim, depth= depth + 1 )
+        else:
+            left_max = self._find_max(node.left, target_dim=target_dim, depth=depth + 1)
+            right_max = self._find_max(node.right, target_dim=target_dim, depth=depth + 1)
+            not_none_candidates = [node for node in [node, left_max, right_max] if node is not None] #Filter out left_min and right_min if it is none
+            return max(not_none_candidates, key= lambda node: node.coordinate[target_dim])
+        
+    def _delete(self,
+                root:KDTreeNode, 
+                target_point: np.ndarray,
+                depth: int = 0):
+        if root is None:
+            return None
+        r"""
+        Delete a point from a subtree starting with given root (This function will be call recursively)
+        
+        Args:
+            - root (KDTreeNode) : the starting node of the subtree
+            - target_point (np.ndarray) : point we want to delete
+            - depth (int) : depth of current root, which is used to determine discriminator
+        """        
+        curr_node_discriminator = depth %self.dimension
+        if np.array_equal(target_point, root.coordinate): 
+            # Found the node to delete
+            if root.right is None and root.left is None:
+                return None
+            
+            if root.right is not None:
+                min_node = self._find_min(node= root.right,target_dim=curr_node_discriminator, depth= depth +1)
+                root.coordinate = min_node.coordinate # replace root with j-min from right subtree
+                root.right = self._delete(root= root.right, target_point= min_node.coordinate,depth=depth + 1)  # deleting min_node from right subtree
+            else:
+                max_node = self._find_max(node= root.left,target_dim=curr_node_discriminator, depth= depth +1)
+                root.coordinate = max_node.coordinate # replace root with j-max from left subtree
+                root.left = self._delete(root= root.left, target_point= max_node.coordinate,depth=depth + 1) # deleting max_node from left subtree
+                
+            
+        else:
+            # Not able to find node to delete yet, keep traverse the tree
+            if target_point[curr_node_discriminator] >= root.coordinate[curr_node_discriminator]:
+                root.right = self._delete(root= root.right,target_point= target_point, depth= depth + 1)
+            else:
+                root.left = self._delete(root= root.left,target_point= target_point, depth= depth + 1)
+        
+        return root
 
 
     def insert(self,
@@ -117,8 +202,14 @@ class KDTree(GeometricDataStructure):
 
     def delete(self,
                point : np.ndarray): 
-        # @TODO: If delete leaf node, it is easy. But if delete internal node, we may need to re-build the enture right subtree
-        raise Exception("This function need to be defined in subclass")
+        r"""
+        Delete a given node from the data structure
+
+        Args:
+            point (np.ndarray) : target point
+        """
+        self._delete(root=self.root,target_point=point,depth= 0)
+
 
 
     def _get_knn(self, 
@@ -206,4 +297,74 @@ class KDTree(GeometricDataStructure):
         # is it the same way with self._get_knn() in the way it traverse the tree. Instead of keeping a priority queue, keeping a list of qualified points
         raise Exception("This function need to be defined in subclass")
     
-   
+    def print_tree(self):
+        if self.root is None:
+            return
+        
+        queue = deque([self.root])
+        while queue:
+            level_size = len(queue)
+            for _ in range(level_size):
+                curr_node = queue.popleft()
+                print(curr_node.coordinate,end="")
+                child_indicator = 0
+                if curr_node.left is not None:
+                    queue.append(curr_node.left)
+                    child_indicator +=1
+                
+                if curr_node.right is not None:
+                    queue.append(curr_node.right)
+                    child_indicator +=2
+                print(f"({child_indicator})",end="\t")
+                
+            print()
+
+
+
+def quickselect_median_point(points:List, 
+                             dim :int = 0,
+                             select_pivot_fn: Optional[Callable]= random.choice):
+    r"""
+    Finding median point from list of high dimensional points with average time complexity O(n)
+    Implemented based on quick select algorithm
+
+    Args:
+        points (list) : list of high dimensional point
+        dim (int) : determine which dimension to compare
+        select_pivot_fn (function pointer) : determine how to select pivot
+    """
+    return quickselect(points, len(points) // 2, select_pivot_fn,dim)
+    
+
+def quickselect(points:list, 
+                k:int, 
+                select_pivot_fn: Callable,
+                dim:int):
+    
+    r"""
+    Quick select algorithm
+
+    Args:
+        points (list) : list of high dimensional point
+        k (int) : kth largest largest element
+        select_pivot_fn (function pointer) : determine how to select pivot
+        dim (int) : determine which dimension to compare
+    """
+
+    if len(points) == 1:
+        assert k == 0
+        return points[0]
+
+    pivot = select_pivot_fn(points)
+
+    lows = [el for el in points if el[dim] < pivot[dim]]
+    highs = [el for el in points if el[dim] > pivot[dim]]
+    pivots = [el for el in points if el[dim] == pivot[dim]]
+
+    if k < len(lows):
+        return quickselect(lows, k, select_pivot_fn,dim)
+    elif k < len(lows) + len(pivots):
+        # Find kth largest element
+        return pivots[0]
+    else:
+        return quickselect(highs, k - len(lows) - len(pivots), select_pivot_fn,dim)
