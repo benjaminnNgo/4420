@@ -5,6 +5,7 @@ from typing import Optional
 from typing import *
 import heapq
 from collections import deque
+import random
 
 # Edit path to import from different module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -65,13 +66,15 @@ class KDTree(GeometricDataStructure):
             return None
         
         compared_axis = depth % self.dimension #define which axis used to split tree into left and right branches
-        sorted_points = sorted(points, key= lambda point: point[compared_axis])
-        median_point_idx = len(sorted_points)//2 #Get the median node to split list of nodes into 2 approximately equal 2 sublist
-        
-        new_node = KDTreeNode(coordinate= sorted_points[median_point_idx])
-        new_node.left = self._construct_tree(points= sorted_points[:median_point_idx], depth= depth+1)
-        new_node.right = self._construct_tree(points= sorted_points[median_point_idx+1:], depth= depth+1)
+
+        median_point = quickselect_median_point(points,compared_axis) #Get the median node to split list of nodes into 2 approximately equal 2 sublist
+        left = [point for point in points if point[compared_axis] <= median_point[compared_axis] and np.any(point != median_point)]
+        right = [point for point in points if point[compared_axis] > median_point[compared_axis]]
+        new_node = KDTreeNode(coordinate= median_point)
+        new_node.left = self._construct_tree(points= left, depth= depth+1)
+        new_node.right = self._construct_tree(points= right, depth= depth+1)
         return new_node
+
         
     def _insert(self, 
                 root:KDTreeNode, 
@@ -315,3 +318,53 @@ class KDTree(GeometricDataStructure):
                 print(f"({child_indicator})",end="\t")
                 
             print()
+
+
+
+def quickselect_median_point(points:List, 
+                             dim :int = 0,
+                             select_pivot_fn: Optional[Callable]= random.choice):
+    r"""
+    Finding median point from list of high dimensional points with average time complexity O(n)
+    Implemented based on quick select algorithm
+
+    Args:
+        points (list) : list of high dimensional point
+        dim (int) : determine which dimension to compare
+        select_pivot_fn (function pointer) : determine how to select pivot
+    """
+    return quickselect(points, len(points) // 2, select_pivot_fn,dim)
+    
+
+def quickselect(points:list, 
+                k:int, 
+                select_pivot_fn: Callable,
+                dim:int):
+    
+    r"""
+    Quick select algorithm
+
+    Args:
+        points (list) : list of high dimensional point
+        k (int) : kth largest largest element
+        select_pivot_fn (function pointer) : determine how to select pivot
+        dim (int) : determine which dimension to compare
+    """
+
+    if len(points) == 1:
+        assert k == 0
+        return points[0]
+
+    pivot = select_pivot_fn(points)
+
+    lows = [el for el in points if el[dim] < pivot[dim]]
+    highs = [el for el in points if el[dim] > pivot[dim]]
+    pivots = [el for el in points if el[dim] == pivot[dim]]
+
+    if k < len(lows):
+        return quickselect(lows, k, select_pivot_fn,dim)
+    elif k < len(lows) + len(pivots):
+        # Find kth largest element
+        return pivots[0]
+    else:
+        return quickselect(highs, k - len(lows) - len(pivots), select_pivot_fn,dim)
