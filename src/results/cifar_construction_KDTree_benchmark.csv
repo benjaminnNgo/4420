@@ -1,0 +1,2 @@
+tree,data_name,operation,elapsed_time
+KDTree,cifar,construction,0.02157095799339004

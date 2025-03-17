@@ -30,6 +30,14 @@ class BruteForce (GeometricDataStructure):
         super().__init__(dimension,points, dist_function)
         
         self.points = self._to_set_of_tuple(self.points)
+
+    # Returns size in bytes
+    def __sizeof__(self):
+        size = sys.getsizeof(self.__dict__)  # Get the size of the object attributes
+        size += sys.getsizeof(self.points)  # Add the size of the points attribute
+        for point in self.points:
+            size += sys.getsizeof(point)  # Add the size of each point in the set
+        return size
     
     def _to_set_of_tuple(self,
                          list: List[np.ndarray])-> Set[Tuple]:
@@ -122,4 +130,5 @@ class BruteForce (GeometricDataStructure):
                 results_list.append(list(point))
 
         return results_list
+
 

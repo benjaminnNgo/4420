@@ -37,6 +37,21 @@ class BallTreeNode:
         self.right = right
         self.points = points
 
+    def __sizeof__(self):
+            size = sys.getsizeof(self.__dict__)
+            size += sys.getsizeof(self.center)
+            size += sys.getsizeof(self.radius)
+            if self.left is not None:
+                size += sys.getsizeof(self.left)
+            if self.right is not None:
+                size += sys.getsizeof(self.right)
+            if self.points is not None:
+                size += sys.getsizeof(self.points)
+                for pt in self.points:
+                    size += sys.getsizeof(pt)
+                    size += pt.nbytes
+            return size
+
 class BallTree(GeometricDataStructure):
     r"""Ball*-tree for efficient nearest neighbor search.
 
@@ -52,8 +67,17 @@ class BallTree(GeometricDataStructure):
                  dist_function: Optional[Callable] = None):
         # Call the superclass initializer first:
         super().__init__(dimension, points, dist_function)
-        self.leaf_size = 1  # you can adjust this threshold if needed
+        self.leaf_size = 10  # Adjustable, should be 10-100 for optimal performance in large datasets.
         self.root = self._construct_tree(points, depth=0)
+
+    # Returns size in bytes
+    def __sizeof__(self):
+        size = sys.getsizeof(self.__dict__)
+        size += sys.getsizeof(self.leaf_size)
+        size += sys.getsizeof(self.dimension)
+        if self.root is not None:
+            size += sys.getsizeof(self.root)
+        return size
     
     def _construct_tree(self,
                         points: List[np.ndarray],
@@ -98,6 +122,7 @@ class BallTree(GeometricDataStructure):
         principal_idx = np.argmax(eigenvalues)
         principal_axis = eigenvectors[:, principal_idx]
         
+        # Alg 2, Line 2
         # Project points onto the principal axis.
         projections = [np.dot(pt - center, principal_axis) for pt in points]
         median_proj = np.median(projections)
