@@ -115,18 +115,21 @@ class BruteForce (GeometricDataStructure):
 
     def query_range(self,
                     center_point: np.ndarray, 
-                    radius:int):
+                    radius: float):
         r"""
-        Get all points that having distance with center point within a given range
-
+        Get all points that have distance to the query point within the specified radius.
+        
         Args:
-            center_point (np.ndarray): target point
-            radius (int) : range
+            center_point (np.ndarray): The query point.
+            radius (float): The search radius.
+            
+        Returns:
+            List[List[float]]: A list of points (as lists) within the radius.
         """
         radius_square = radius**2
         results_list = []
         for point in self.points:
-            if self.dist_function(pointA=center_point,pointB=np.array(point)) < radius_square:
+            if self.dist_function(pointA=center_point, pointB=np.array(point)) <= radius_square:
                 results_list.append(list(point))
 
         return results_list

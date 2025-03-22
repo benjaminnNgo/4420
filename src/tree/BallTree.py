@@ -67,7 +67,7 @@ class BallTree(GeometricDataStructure):
                  dist_function: Optional[Callable] = None):
         # Call the superclass initializer first:
         super().__init__(dimension, points, dist_function)
-        self.leaf_size = 10  # Adjustable, should be 10-100 for optimal performance in large datasets.
+        self.leaf_size = 50  # Adjustable, should be 10-100 for optimal performance in large datasets.
         self.root = self._construct_tree(points, depth=0)
 
     # Returns size in bytes
@@ -316,24 +316,45 @@ class BallTree(GeometricDataStructure):
         return knn[0] if knn else None
 
     def query_range(self,
-                    center_point: np.ndarray, 
-                    radius: int):
+                center_point: np.ndarray, 
+                radius: float):
         r"""
         Retrieves all points within a given radius of center_point.
+        
+        Args:
+            center_point (np.ndarray): The center of the search sphere
+            radius (float): The search radius
+            
+        Returns:
+            List[np.ndarray]: Points within the radius
         """
         result = []
+        # Square the radius once for comparison with squared distances
+        radius_squared = radius**2
+        
         def _query(node: BallTreeNode):
             if node is None:
                 return
-            center_dist = np.sqrt(self.dist_function(node.center, center_point))
-            if center_dist - node.radius > radius:
+                
+            # Use squared distance directly without square root
+            center_dist_squared = self.dist_function(node.center, center_point)
+            
+            # Pruning condition using squared distance
+            # If the minimum possible squared distance exceeds radius_squared, prune
+            # Calculate the minimum possible distance from query point to any point in this node
+            min_possible_dist = max(0, np.sqrt(center_dist_squared) - node.radius)
+            if min_possible_dist**2 > radius_squared:
                 return
+                
             if node.points is not None:
                 for pt in node.points:
-                    if np.sqrt(self.dist_function(pt, center_point)) <= radius:
+                    # Direct comparison of squared distances
+                    if self.dist_function(pt, center_point) <= radius_squared:
                         result.append(pt)
             else:
                 _query(node.left)
                 _query(node.right)
+                
         _query(self.root)
         return result
+    

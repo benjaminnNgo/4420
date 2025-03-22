@@ -1,2 +1,2 @@
 data_name,space_used,tree
-cifar,432932,KDTree
+gauss,228132,KDTree

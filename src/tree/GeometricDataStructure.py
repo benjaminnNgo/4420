@@ -5,7 +5,8 @@ import numpy as np
 
 # Edit path to import from different module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from tree.utils import euclidean_squ_distance
+from tree.utils import euclidean_distance
+from tree.utils import euclidean_squared_distance
 
 """
 Authors: Tran Gia Bao Ngo
@@ -20,7 +21,7 @@ class GeometricDataStructure:
                  ):
         self.points = points
         self.dimension = dimension
-        self.dist_function = euclidean_squ_distance if dist_function is None else dist_function
+        self.dist_function = euclidean_squared_distance if dist_function is None else dist_function
 
     def insert(self,point:np.ndarray): 
         raise Exception("This function need to be defined in subclass")

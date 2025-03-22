@@ -6,7 +6,7 @@ import numpy as np
 
 # Edit path to import from different module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from tree.utils import euclidean_squ_distance
+
 
 AVAILABLE_DATASETS = {
     'cifar',
@@ -15,7 +15,8 @@ AVAILABLE_DATASETS = {
     'enron',
     'glove',
     'imageNet',
-    'millionSong'
+    'millionSong',
+    'gauss',
     'MNIST',
     'notre',
     'nuswide',

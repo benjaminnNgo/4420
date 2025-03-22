@@ -267,7 +267,7 @@ class KDTree(GeometricDataStructure):
 
             but for efficiency, we call heappushpop, which accomplish the same thing but faster
             """
-            
+        
         
         if point[compared_axis] < compared_node.coordinate[compared_axis]:
             # We prioritize go the left child in this case
@@ -308,11 +308,66 @@ class KDTree(GeometricDataStructure):
         """
         return self._get_knn(point = np.array(point), compared_node = self.root, k= 1, priority_queue = [])[0]
     
-    def query_range(self,
-                    center_point: np.ndarray, 
-                    radius:int):
-        # is it the same way with self._get_knn() in the way it traverse the tree. Instead of keeping a priority queue, keeping a list of qualified points
-        raise Exception("This function need to be defined in subclass")
+    def _range_search(self, 
+                 point: np.ndarray, 
+                 radius: float,
+                 node: KDTreeNode, 
+                 results: List,
+                 depth: int = 0):
+        """
+        Private function: Find all points within the specified radius of the target point
+        
+        Args:
+            point (np.ndarray): target point
+            radius (float): search radius
+            node (KDTreeNode): current node in the tree
+            results (List): accumulator for points within the radius
+            depth (int): depth of current node, used to determine the axis
+        """
+        if node is None:
+            return
+        
+        # Calculate the distance from the query point to the current node's point
+        curr_dist = self.dist_function(pointA=point, pointB=node.coordinate)
+        
+        # If this point is within the radius, add it to our results
+        if curr_dist <= radius**2:  # Compare with squared radius since we're using squared distance
+            results.append(node.coordinate.tolist())
+        
+        # Determine the axis for this level
+        curr_axis = depth % self.dimension
+        
+        # Determine which child to visit first (the one on the same side of the splitting plane)
+        if point[curr_axis] < node.coordinate[curr_axis]:
+            first_branch = node.left
+            second_branch = node.right
+        else:
+            first_branch = node.right
+            second_branch = node.left
+        
+        # Always search the branch that contains the query point
+        self._range_search(point, radius, first_branch, results, depth + 1)
+        
+        # Check if we need to search the other branch
+        # We only need to search it if the distance from the query point to the splitting plane
+        # is less than or equal to the radius
+        if (point[curr_axis] - node.coordinate[curr_axis])**2 <= radius**2:
+            self._range_search(point, radius, second_branch, results, depth + 1)
+        
+        return results
+
+    def query_range(self, center_point: np.ndarray, radius: float):
+        """
+        Find all points within the specified radius of the target point
+        
+        Args:
+            point (np.ndarray): target point
+            radius (float): search radius
+            
+        Returns:
+            List: all points within the radius
+        """
+        return self._range_search(center_point, radius, self.root, [], 0)
     
     def print_tree(self):
         if self.root is None:

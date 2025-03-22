@@ -6,7 +6,6 @@ import numpy as np
 # Adjust the path to import the tree module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from tree import KDTree, BallTree, BruteForce
-from data_loader.data_utils import data_loader
 
 def make_hashable(item):
     if isinstance(item, np.ndarray):
@@ -57,6 +56,26 @@ class TestKDTree(unittest.TestCase):
         self.assertTrue(np.array_equal(kd_nearest_reinsert, target),
                         "After reinsertion, the target should again be returned as the nearest neighbor")
 
+    def test_range_search_kd_tree(self):
+        """Test that KDTree returns the correct points within a radius"""
+        query = np.array([5, 5])
+        radius = 2.5
+        
+        # Get points within radius
+        result = self.kd_tree.query_range(query, radius)
+        
+        # Expected points within radius 2.5 of [5,5]:
+        # [3,5], [4,6], [5,6], [5,8]
+        expected_set = arrays_to_set([np.array(p) for p in [
+            [3, 5], [4, 6], [5, 6], [3, 4], [6, 7]
+        ]])
+        
+        # Convert results to sets for comparison (ignoring order)
+        result_set = arrays_to_set(result)
+        
+        self.assertEqual(result_set, expected_set,
+                        f"KDTree range search should return correct points within radius. Got {result_set}, expected {expected_set}")
+
 class TestBallTree(unittest.TestCase):
     def setUp(self):
         self.points = [np.array(p) for p in [
@@ -93,6 +112,23 @@ class TestBallTree(unittest.TestCase):
         knn = self.ball_tree.get_knn(query, k)
         self.assertEqual(len(knn), k,
                          "BallTree.get_knn should return exactly k neighbors")
+        
+    def test_range_search_ball_tree(self):
+        """Test that BallTree returns the correct points within a radius"""
+        query = np.array([5, 5])
+        radius = 2.5
+        
+        # Get points within radius
+        result = self.ball_tree.query_range(query, radius)
+        
+        # Convert results to sets for comparison (ignoring order)
+        result_set = arrays_to_set(result)
+        expected_set = arrays_to_set([np.array(p) for p in [
+            [3, 5], [4, 6], [5, 6], [3, 4], [6, 7]
+        ]])
+        
+        self.assertEqual(result_set, expected_set,
+                        f"BallTree range search should return correct points within radius. Got {result_set}, expected {expected_set}")
 
 class TestTreeComparison(unittest.TestCase):
     def setUp(self):
@@ -130,6 +166,31 @@ class TestTreeComparison(unittest.TestCase):
                         "KDTree.get_nearest output should match BruteForce.get_nearest")
         self.assertTrue(np.array_equal(ball_nearest, brute_nearest),
                         "BallTree.get_nearest output should match BruteForce.get_nearest")
+        
+    def test_range_search_comparison(self):
+        """Test that all three implementations return the same points for range search"""
+        # Test with a few different queries and radii
+        test_cases = [
+            (np.array([5, 5]), 2.5),  # Medium radius
+            (np.array([3, 3]), 1.0),  # Small radius
+            (np.array([9, 9]), 10.0), # Large radius covering all points
+            (np.array([20, 20]), 1.0) # No points in range
+        ]
+        
+        for query, radius in test_cases:
+            kd_result = self.kd_tree.query_range(query, radius)
+            ball_result = self.ball_tree.query_range(query, radius)
+            brute_result = self.brute.query_range(query, radius)
+            
+            # Convert to sets for comparison
+            kd_set = arrays_to_set(kd_result)
+            ball_set = arrays_to_set(ball_result)
+            brute_set = arrays_to_set(brute_result)
+            
+            self.assertEqual(kd_set, brute_set,
+                            f"KDTree and BruteForce range search results should match for query {query} and radius {radius}")
+            self.assertEqual(ball_set, brute_set,
+                            f"BallTree and BruteForce range search results should match for query {query} and radius {radius}")
 
 if __name__ == '__main__':
     unittest.main()

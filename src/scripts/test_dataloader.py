@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from data_loader import data_loader
 from tree import KDTree, BruteForce
-from tree.utils import euclidean_squ_distance
+from tree.utils import euclidean_distance
 
 # # Open the HDF5 file in read mode
 # with h5py.File("datasets/notre.hdf5", "r") as f:
