@@ -1,8 +1,18 @@
 import numpy as np
 import timeit
 
-def euclidean_distance(pointA: np.array, pointB: np.array):
-    return np.sum(np.square(pointA - pointB))
+def euclidean_distance(pointA, pointB):
+    """
+    Compute the Euclidean distance between two points.
+    
+    Args:
+        pointA (np.ndarray): First point.
+        pointB (np.ndarray): Second point.
+    
+    Returns:
+        float: The Euclidean distance.
+    """
+    return np.sqrt(np.sum(np.square(pointA - pointB)))
 
 def euclidean_squared_distance(pointA, pointB):
     """
@@ -36,7 +46,7 @@ def measure_construction_performance(ds, dimension: int, points: list,
     elapsed_time = timeit.default_timer() - start
     return elapsed_time
 
-def measure_insert_performance(ds, point: np.ndarray):
+def measure_insert_performance(ds, point):
     """
     Measures the time taken to perform an insert operation on a GeometricDataStructure instance.
     
@@ -52,7 +62,7 @@ def measure_insert_performance(ds, point: np.ndarray):
     elapsed_time = timeit.default_timer() - start
     return elapsed_time
 
-def measure_get_knn_performance(ds, point: np.ndarray, k: int):
+def measure_get_knn_performance(ds, point, k: int):
     """
     Measures the time taken for the get_knn method.
     
@@ -69,7 +79,7 @@ def measure_get_knn_performance(ds, point: np.ndarray, k: int):
     elapsed_time = timeit.default_timer() - start
     return elapsed_time
 
-def measure_get_nearest_performance(ds, point: np.ndarray):
+def measure_get_nearest_performance(ds, point):
     """
     Measures the time taken for the get_nearest method.
     
@@ -85,7 +95,7 @@ def measure_get_nearest_performance(ds, point: np.ndarray):
     elapsed_time = timeit.default_timer() - start
     return elapsed_time
 
-def measure_delete_performance(ds, point: np.ndarray):
+def measure_delete_performance(ds, point):
     """
     Measures the time taken for the delete method.
     
@@ -101,7 +111,7 @@ def measure_delete_performance(ds, point: np.ndarray):
     elapsed_time = timeit.default_timer() - start
     return elapsed_time
 
-def measure_range_search_performance(ds, point: np.ndarray, radius: float):
+def measure_range_search_performance(ds, point, radius: float):
     """
     Measures the time taken for the range search method.
     

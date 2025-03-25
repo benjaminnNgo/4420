@@ -30,8 +30,8 @@ from tree.utils import measure_get_knn_performance, measure_insert_performance, 
     Returns:
         list: A list containing the space used by the data structure.
 """
-def run_space_benchmark(data_name, data_structure="KDTree"):
-    data = data_loader(data_name)
+def run_space_benchmark(data_name, data_structure="KDTree", cap_dataset=False):
+    data = data_loader(data_name, cap_dataset=cap_dataset)
     dataset = data.points
 
     if data_structure == "KDTree":
@@ -62,8 +62,8 @@ def run_space_benchmark(data_name, data_structure="KDTree"):
     Returns:
         list: A list of results containing the elapsed time for each query.
 """
-def run_knn_benchmark(data_name, data_structure="KDTree", k=5, trials=5, num_queries=5, use_max_queries=False):
-    data = data_loader(data_name)
+def run_knn_benchmark(data_name, data_structure="KDTree", k=5, trials=5, num_queries=5, use_max_queries=False, cap_dataset=False):
+    data = data_loader(data_name, cap_dataset=cap_dataset)
     dataset = data.points
     queries = data.queries
 
@@ -118,8 +118,8 @@ def run_knn_benchmark(data_name, data_structure="KDTree", k=5, trials=5, num_que
     Returns:
         list: A list of results containing the elapsed time for each query.
 """
-def run_nearest_benchmark(data_name, data_structure="KDTree", trials=5, num_queries=5, use_max_queries=False):
-    data = data_loader(data_name)
+def run_nearest_benchmark(data_name, data_structure="KDTree", trials=5, num_queries=5, use_max_queries=False, cap_dataset=False):
+    data = data_loader(data_name, cap_dataset=cap_dataset)
     dataset = data.points
     queries = data.queries
 
@@ -173,8 +173,8 @@ def run_nearest_benchmark(data_name, data_structure="KDTree", trials=5, num_quer
     Returns:
         list: A list of results containing the elapsed time for each insertion.
 """
-def run_insert_benchmark(data_name, data_structure="KDTree", num_inserts=5, trials=5, use_max_queries=False):
-    data = data_loader(data_name)
+def run_insert_benchmark(data_name, data_structure="KDTree", num_inserts=5, trials=5, use_max_queries=False, cap_dataset=False):
+    data = data_loader(data_name, cap_dataset=cap_dataset)
     dataset = data.points
     queries = data.queries
 
@@ -231,8 +231,8 @@ def run_insert_benchmark(data_name, data_structure="KDTree", num_inserts=5, tria
     Returns:
         list: A list of results containing the elapsed time for each deletion.
 """
-def run_delete_benchmark(data_name, data_structure="KDTree", num_deletes=5, trials=5, use_max_queries=False):
-    data = data_loader(data_name)
+def run_delete_benchmark(data_name, data_structure="KDTree", num_deletes=5, trials=5, use_max_queries=False, cap_dataset=False):
+    data = data_loader(data_name, cap_dataset=cap_dataset)
     dataset = data.points
     queries = data.queries
 
@@ -302,8 +302,8 @@ def run_delete_benchmark(data_name, data_structure="KDTree", num_deletes=5, tria
     Returns:
         list: A list of results containing the elapsed time for each query.
 """
-def run_range_search_benchmark(data_name, data_structure="KDTree", radius=0.5, trials=5, num_queries=5, use_max_queries=False):
-    data = data_loader(data_name)
+def run_range_search_benchmark(data_name, data_structure="KDTree", radius=0.5, trials=5, num_queries=5, use_max_queries=False, cap_dataset=False):
+    data = data_loader(data_name, cap_dataset=cap_dataset)
     dataset = data.points
     queries = data.queries
 
@@ -357,8 +357,8 @@ def run_range_search_benchmark(data_name, data_structure="KDTree", radius=0.5, t
     Returns:
         list: A list containing the elapsed time for each trial of construction.
 """
-def run_construction_benchmark(data_name, data_structure="KDTree", trials=5):
-    data = data_loader(data_name)
+def run_construction_benchmark(data_name, data_structure="KDTree", trials=5, cap_dataset=False):
+    data = data_loader(data_name, cap_dataset=cap_dataset)
     dataset = data.points
 
     import timeit
@@ -405,21 +405,21 @@ def save_results_csv(results, filename):
         for row in results:
             writer.writerow(row)
 
-def benchmark_and_save(data_name, operation="get_knn", data_structure="KDTree", k=5, trials=5, num_operations=5, radius=3.0, use_max_queries=False):
+def benchmark_and_save(data_name, operation="get_knn", data_structure="KDTree", k=5, trials=5, num_operations=5, radius=3.0, use_max_queries=False, cap_dataset=False):
     if operation == "get_knn":
-        results_list = run_knn_benchmark(data_name, data_structure=data_structure, k=k, trials=trials, num_queries=num_operations, use_max_queries=use_max_queries)
+        results_list = run_knn_benchmark(data_name, data_structure=data_structure, k=k, trials=trials, num_queries=num_operations, use_max_queries=use_max_queries, cap_dataset=cap_dataset)
     elif operation == "insert":
-        results_list = run_insert_benchmark(data_name, data_structure=data_structure, num_inserts=num_operations, trials=trials, use_max_queries=use_max_queries)
+        results_list = run_insert_benchmark(data_name, data_structure=data_structure, num_inserts=num_operations, trials=trials, use_max_queries=use_max_queries, cap_dataset=cap_dataset)
     elif operation == "delete":
-        results_list = run_delete_benchmark(data_name, data_structure=data_structure, num_deletes=num_operations, trials=trials, use_max_queries=use_max_queries)
+        results_list = run_delete_benchmark(data_name, data_structure=data_structure, num_deletes=num_operations, trials=trials, use_max_queries=use_max_queries, cap_dataset=cap_dataset)
     elif operation == "construction":
-        results_list = run_construction_benchmark(data_name, data_structure=data_structure, trials=trials)
+        results_list = run_construction_benchmark(data_name, data_structure=data_structure, trials=trials, cap_dataset=cap_dataset)
     elif operation == "nearest":
-        results_list = run_nearest_benchmark(data_name, data_structure=data_structure, trials=trials, num_queries=num_operations, use_max_queries=use_max_queries)
+        results_list = run_nearest_benchmark(data_name, data_structure=data_structure, trials=trials, num_queries=num_operations, use_max_queries=use_max_queries, cap_dataset=cap_dataset)
     elif operation == "space":
-        results_list = run_space_benchmark(data_name, data_structure=data_structure)
+        results_list = run_space_benchmark(data_name, data_structure=data_structure, cap_dataset=cap_dataset)
     elif operation == "range_search":
-        results_list = run_range_search_benchmark(data_name, data_structure=data_structure, radius=radius, trials=trials, num_queries=num_operations, use_max_queries=use_max_queries)
+        results_list = run_range_search_benchmark(data_name, data_structure=data_structure, radius=radius, trials=trials, num_queries=num_operations, use_max_queries=use_max_queries, cap_dataset=cap_dataset)
     else:
         raise Exception("Unsupported operation")
 
@@ -442,6 +442,7 @@ parser.add_argument('--trials', type=int, default=5, help='Number of trials to r
 parser.add_argument('--num_operations', type=int, default=5, help='Number of operations to perform')
 parser.add_argument('--radius', type=float, default=3.0, help='Radius for range search queries')
 parser.add_argument('--use_max_queries', action='store_true', default=False, help='If True, overrides num_queries and sets it to the max possible value')
+parser.add_argument('--cap_dataset', action='store_true', default=False, help='If True, caps the dataset size to 50,000 points')
 args = parser.parse_args()
 
 if __name__ == '__main__':
@@ -453,7 +454,8 @@ if __name__ == '__main__':
         trials=args.trials,
         num_operations=args.num_operations,
         radius=args.radius,
-        use_max_queries=args.use_max_queries
+        use_max_queries=args.use_max_queries,
+        cap_dataset=args.cap_dataset
     )
 
     # for dataset in DATASETS:

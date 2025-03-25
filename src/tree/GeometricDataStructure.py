@@ -35,6 +35,6 @@ class GeometricDataStructure:
     def get_nearest(self,point : np.ndarray): 
         raise Exception("This function need to be defined in subclass")
     
-    def query_range(self,center_point: np.ndarray, radius:int):
+    def query_range(self,center_point: np.ndarray, radius:float):
         raise Exception("This function need to be defined in subclass")
     

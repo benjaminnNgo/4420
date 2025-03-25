@@ -3,7 +3,7 @@ import h5py
 import os
 import sys
 
-def generate_gauss_dataset(n=10, seed=42, output_dir="src/datasets"):
+def generate_gauss_dataset(n=10, seed=42, output_dir=None):
     """
     Generate a Gaussian mixture dataset similar to the one described in the repository.
     
@@ -12,6 +12,12 @@ def generate_gauss_dataset(n=10, seed=42, output_dir="src/datasets"):
         seed (int): Random seed for reproducibility
         output_dir (str): Directory where to save the HDF5 file
     """
+    # Use absolute path resolution
+    if output_dir is None:
+        # Get the directory of the current script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        # Go up one level to the src directory, then to datasets
+        output_dir = os.path.join(os.path.dirname(script_dir), "datasets")
     np.random.seed(seed)
     
     # Dataset parameters
@@ -19,7 +25,7 @@ def generate_gauss_dataset(n=10, seed=42, output_dir="src/datasets"):
     num_points_total = 2000 * (n ** 3)  # Total number of points
     points_per_cluster = num_points_total // num_clusters
     dim = 512  # Dimensionality of the data
-    num_queries = 500  # Number of query points
+    num_queries = 200  # Number of query points
     
     print(f"Generating Gaussian mixture dataset with:")
     print(f"- {num_points_total} total points")
@@ -110,7 +116,7 @@ if __name__ == "__main__":
     # Default parameters
     n = 10
     seed = 42
-    output_dir = "src/datasets"
+    output_dir = None  # Use the default path resolution in the function
     
     # Parse command line arguments
     if len(sys.argv) > 1:
@@ -118,6 +124,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         seed = int(sys.argv[2])
     if len(sys.argv) > 3:
-        output_dir = sys.argv[3]
+        output_dir = os.path.abspath(sys.argv[3])  # Convert to absolute path
     
     generate_gauss_dataset(n, seed, output_dir)

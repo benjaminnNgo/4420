@@ -41,9 +41,9 @@ class KDTreeNode:
         if hasattr(self.coordinate, "nbytes"):
             size += self.coordinate.nbytes
         if self.left is not None:
-            size += sys.getsizeof(self.left)
+            size += self.left.__sizeof__()  # Call __sizeof__ recursively, not sys.getsizeof()
         if self.right is not None:
-            size += sys.getsizeof(self.right)
+            size += self.right.__sizeof__()  # Call __sizeof__ recursively, not sys.getsizeof()
         return size
         
 class KDTree(GeometricDataStructure):
@@ -66,7 +66,7 @@ class KDTree(GeometricDataStructure):
         size = sys.getsizeof(self.__dict__)
         size += sys.getsizeof(self.dimension)
         if self.root is not None:
-            size += sys.getsizeof(self.root)
+            size += self.root.__sizeof__()  # Call __sizeof__ recursively, not sys.getsizeof()
         return size
 
     def _construct_tree(self,
@@ -213,7 +213,7 @@ class KDTree(GeometricDataStructure):
         """
         
         if self.root is None:
-            self.root = KDTreeNode(coordinate= point, compare_axis= 0)
+            self.root = KDTreeNode(coordinate= point)
         else:
             self._insert(root= self.root, point = point,depth = 0)
 
@@ -268,7 +268,7 @@ class KDTree(GeometricDataStructure):
             but for efficiency, we call heappushpop, which accomplish the same thing but faster
             """
         
-        
+
         if point[compared_axis] < compared_node.coordinate[compared_axis]:
             # We prioritize go the left child in this case
             next_node = compared_node.left

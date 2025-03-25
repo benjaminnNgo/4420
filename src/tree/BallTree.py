@@ -42,9 +42,9 @@ class BallTreeNode:
             size += sys.getsizeof(self.center)
             size += sys.getsizeof(self.radius)
             if self.left is not None:
-                size += sys.getsizeof(self.left)
+                size += self.left.__sizeof__()
             if self.right is not None:
-                size += sys.getsizeof(self.right)
+                size += self.right.__sizeof__()
             if self.points is not None:
                 size += sys.getsizeof(self.points)
                 for pt in self.points:
@@ -76,7 +76,7 @@ class BallTree(GeometricDataStructure):
         size += sys.getsizeof(self.leaf_size)
         size += sys.getsizeof(self.dimension)
         if self.root is not None:
-            size += sys.getsizeof(self.root)
+            size += self.root.__sizeof__()
         return size
     
     def _construct_tree(self,
