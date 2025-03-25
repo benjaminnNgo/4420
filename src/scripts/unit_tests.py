@@ -191,6 +191,48 @@ class TestTreeComparison(unittest.TestCase):
                             f"KDTree and BruteForce range search results should match for query {query} and radius {radius}")
             self.assertEqual(ball_set, brute_set,
                             f"BallTree and BruteForce range search results should match for query {query} and radius {radius}")
+            
+    def test_sizeof_method(self):
+        """Test and print the memory size of each data structure"""
+        # Get initial sizes
+        kd_size = self.kd_tree.__sizeof__()
+        ball_size = self.ball_tree.__sizeof__()
+        brute_size = self.brute.__sizeof__()
+        
+        print("\n===== Memory Usage Test =====")
+        print(f"Initial KDTree size: {kd_size} bytes")
+        print(f"Initial BallTree size: {ball_size} bytes")
+        print(f"Initial BruteForce size: {brute_size} bytes")
+        
+        # Verify sizes are reasonable
+        self.assertGreater(kd_size, 0, "KDTree size should be positive")
+        self.assertGreater(ball_size, 0, "BallTree size should be positive")
+        self.assertGreater(brute_size, 0, "BruteForce size should be positive")
+        
+        # Add more points to see if size increases
+        additional_points = [np.array(p) for p in [
+            [10, 10], [11, 11], [12, 12], [13, 13], [14, 14]
+        ]]
+        
+        for point in additional_points:
+            self.kd_tree.insert(point)
+            self.ball_tree.insert(point)
+            self.brute.insert(point)
+        
+        # Get new sizes
+        kd_size_after = self.kd_tree.__sizeof__()
+        ball_size_after = self.ball_tree.__sizeof__()
+        brute_size_after = self.brute.__sizeof__()
+        
+        print(f"KDTree size after adding 5 points: {kd_size_after} bytes (Δ: {kd_size_after - kd_size})")
+        print(f"BallTree size after adding 5 points: {ball_size_after} bytes (Δ: {ball_size_after - ball_size})")
+        print(f"BruteForce size after adding 5 points: {brute_size_after} bytes (Δ: {brute_size_after - brute_size})")
+        
+        # Verify sizes increased
+        self.assertGreater(kd_size_after, kd_size, "KDTree size should increase after adding points")
+        self.assertGreater(ball_size_after, ball_size, "BallTree size should increase after adding points")
+        self.assertGreater(brute_size_after, brute_size, "BruteForce size should increase after adding points")
+        print("===== Memory Usage Test Complete =====\n")
 
 if __name__ == '__main__':
     unittest.main()
