@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1,trial_2,trial_3
+0.41793288476765156,sift,construction,BruteForce,0.4089229768142104,0.42789393197745085,0.4169817455112934

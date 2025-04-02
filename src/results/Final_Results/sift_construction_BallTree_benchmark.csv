@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1,trial_2,trial_3
+13.987963964852193,sift,construction,BallTree,14.088337901979685,13.940853205509484,13.934700787067413

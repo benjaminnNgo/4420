@@ -1,0 +1,282 @@
+# Makefile for running unit tests or benchmark tests
+
+# Python 3 executable
+PYTHON3 = python3
+
+CONDA_ENV = myenv
+CONDA_PREFIX = /data/ugrad/rostj/miniforge
+
+# Directories for the tests
+SCRIPTS_DIR = src/scripts
+UNIT_TESTS = $(SCRIPTS_DIR)/unit_tests.py
+BENCHMARK_TESTS = $(SCRIPTS_DIR)/benchmark_tests.py
+
+# Add these lines to your Makefile
+BENCHMARK_TESTS2 = $(SCRIPTS_DIR)/benchmark_tests2.py
+
+# Default parameters for benchmark tests
+K = 5
+TRIALS = 3
+NUM_OPERATIONS = 500
+RADIUS = 3.0
+# USE_MAX_QUERIES = false
+USE_MAX_QUERIES = true
+CAP_DATASET = true  # Add this line
+
+# Number of parallel jobs to run (adjust based on available cores)
+PARALLEL_JOBS = 60
+
+# Options for data structures, datasets, and operations
+DATA_STRUCTURES = KDTree BallTree BruteForce
+DATASETS = cifar audio deep enron glove imageNet millionSong MNIST notre nuswide sift sun trevi ukbench
+DIF_SIZE_DATASETS = cifar sun gauss
+DIF_DIM_DATASETS = sift gauss enron trevi
+DIF_DIM_DATASETS_2 = gauss enron trevi
+OPERATIONS = get_knn insert construction nearest space range_search delete
+
+# Default target
+.PHONY: all
+all: unit_tests
+
+.PHONY: show_pwd
+show_pwd:
+	@echo "PWD is: $(PWD)"
+
+# Run unit tests
+.PHONY: unit_tests
+unit_tests:
+	$(PYTHON3) $(UNIT_TESTS)
+
+# Run benchmark tests with arguments
+.PHONY: benchmark_tests
+benchmark_tests:
+	$(PYTHON3) $(BENCHMARK_TESTS) --data_structure=$(data_structure) --dataset=$(dataset) --operation=$(operation) --k=$(k) --trials=$(trials) --num_operations=$(num_operations) --radius=$(radius) $(if $(filter true,$(use_max_queries)),--use_max_queries) $(if $(filter true,$(cap_dataset)),--cap_dataset)
+
+# Run benchmark tests with the second script
+.PHONY: benchmark_tests2
+benchmark_tests2:
+	$(PYTHON3) $(BENCHMARK_TESTS2) --data_structure=$(data_structure) --dataset=$(dataset) --operation=$(operation) --k=$(k) --trials=$(trials) --num_operations=$(num_operations) --radius=$(radius) $(if $(filter true,$(use_max_queries)),--use_max_queries) $(if $(filter true,$(cap_dataset)),--cap_dataset)
+
+# Run all combinations of data structures, operations, and datasets
+.PHONY: run_all
+run_all:
+	@for data_structure in $(DATA_STRUCTURES); do \
+		for dataset in $(DIF_SIZE_DATASETS); do \
+			for operation in $(OPERATIONS); do \
+				$(MAKE) benchmark_tests data_structure=$$data_structure dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) ; \
+			done; \
+		done; \
+	done;
+
+	@for data_structure in $(DATA_STRUCTURES); do \
+		for dataset in $(DIF_DIM_DATASETS); do \
+			for operation in $(OPERATIONS); do \
+				$(MAKE) benchmark_tests data_structure=$$data_structure dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET) ; \
+			done; \
+		done; \
+	done;
+
+
+
+
+
+# ball tree and brute force broken up for size test
+# BallTree - Split by dataset with dif_size naming
+.PHONY: run_balltree_dif_size_cifar
+run_balltree_dif_size_cifar:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=BallTree dataset=cifar operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES); \
+	done;
+
+.PHONY: run_balltree_dif_size_sun
+run_balltree_dif_size_sun:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=BallTree dataset=sun operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES); \
+	done;
+
+.PHONY: run_balltree_dif_size_gauss
+run_balltree_dif_size_gauss:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=BallTree dataset=gauss operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES); \
+	done;
+
+# BruteForce - Split by dataset with dif_size naming
+.PHONY: run_bruteforce_dif_size_cifar
+run_bruteforce_dif_size_cifar:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=BruteForce dataset=cifar operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES); \
+	done;
+
+.PHONY: run_bruteforce_dif_size_sun
+run_bruteforce_dif_size_sun:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=BruteForce dataset=sun operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES); \
+	done;
+
+.PHONY: run_bruteforce_dif_size_gauss
+run_bruteforce_dif_size_gauss:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=BruteForce dataset=gauss operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES); \
+	done;
+
+
+
+
+
+
+# ball tree and brute force broken up for dim test
+# BallTree with trevi dataset
+.PHONY: run_balltree_dif_dim_trevi
+run_balltree_dif_dim_trevi:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=BallTree dataset=trevi operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET); \
+	done;
+
+# BallTree with enron dataset
+.PHONY: run_balltree_dif_dim_enron
+run_balltree_dif_dim_enron:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=BallTree dataset=enron operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET); \
+	done;
+
+# BruteForce with trevi dataset
+.PHONY: run_bruteforce_dif_dim_trevi
+run_bruteforce_dif_dim_trevi:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=BruteForce dataset=trevi operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET); \
+	done;
+
+# BruteForce with enron dataset
+.PHONY: run_bruteforce_dif_dim_enron
+run_bruteforce_dif_dim_enron:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=BruteForce dataset=enron operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET); \
+	done;
+
+
+# KDTree with trevi dataset
+.PHONY: run_kdtree_dif_dim_trevi
+run_kdtree_dif_dim_trevi:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=KDTree dataset=trevi operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET); \
+	done;
+
+# KDTree with enron dataset
+.PHONY: run_kdtree_dif_dim_enron
+run_kdtree_dif_dim_enron:
+	@for operation in $(OPERATIONS); do \
+		$(MAKE) benchmark_tests2 data_structure=KDTree dataset=enron operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET); \
+	done;
+
+
+
+
+
+
+
+# KDTree with different datasets
+.PHONY: run_kdtree_dif_size
+run_kdtree_dif_size:
+	@for dataset in $(DIF_SIZE_DATASETS); do \
+		for operation in $(OPERATIONS); do \
+			$(MAKE) benchmark_tests data_structure=KDTree dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES); \
+		done; \
+	done;
+
+# BallTree with different datasets
+.PHONY: run_balltree_dif_size
+run_balltree_dif_size:
+	@for dataset in $(DIF_SIZE_DATASETS); do \
+		for operation in $(OPERATIONS); do \
+			$(MAKE) benchmark_tests data_structure=BallTree dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES); \
+		done; \
+	done;
+
+# BruteForce with different datasets
+.PHONY: run_bruteforce_dif_size
+run_bruteforce_dif_size:
+	@for dataset in $(DIF_SIZE_DATASETS); do \
+		for operation in $(OPERATIONS); do \
+			$(MAKE) benchmark_tests data_structure=BruteForce dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES); \
+		done; \
+	done;
+
+
+
+
+# KDTree with different dimensions
+.PHONY: run_kdtree_dif_dim
+run_kdtree_dif_dim:
+	@for dataset in $(DIF_DIM_DATASETS); do \
+		for operation in $(OPERATIONS); do \
+			$(MAKE) benchmark_tests data_structure=KDTree dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET); \
+		done; \
+	done;
+
+# BallTree with different dimensions
+.PHONY: run_balltree_dif_dim
+run_balltree_dif_dim:
+	@for dataset in $(DIF_DIM_DATASETS); do \
+		for operation in $(OPERATIONS); do \
+			$(MAKE) benchmark_tests data_structure=BallTree dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET); \
+		done; \
+	done;
+
+# BruteForce with different dimensions
+.PHONY: run_bruteforce_dif_dim
+run_bruteforce_dif_dim:
+	@for dataset in $(DIF_DIM_DATASETS); do \
+		for operation in $(OPERATIONS); do \
+			$(MAKE) benchmark_tests data_structure=BruteForce dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET); \
+		done; \
+	done;
+
+
+
+
+
+
+
+.PHONY: run_dif_size
+run_dif_size:
+	@for data_structure in $(DATA_STRUCTURES); do \
+		for dataset in $(DIF_SIZE_DATASETS); do \
+			for operation in $(OPERATIONS); do \
+				$(MAKE) benchmark_tests data_structure=$$data_structure dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) ; \
+			done; \
+		done; \
+	done;
+
+
+.PHONY: run_dif_dim
+run_dif_dim:
+	@for data_structure in $(DATA_STRUCTURES); do \
+		for dataset in $(DIF_DIM_DATASETS); do \
+			for operation in $(OPERATIONS); do \
+				$(MAKE) benchmark_tests data_structure=$$data_structure dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET) ; \
+			done; \
+		done; \
+	done;
+
+
+
+
+
+
+# Help target to provide the correct format for benchmark_tests
+.PHONY: help
+help:
+	@echo "To run the benchmark tests manually, use the following format:"
+	@echo "  make benchmark_tests data_structure=<data_structure> dataset=<dataset> operation=<operation> k=<k> trials=<trials> num_operations=<num_operations> radius=<radius> [use_max_queries=true] [cap_dataset=true]"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make benchmark_tests data_structure=KDTree dataset=cifar operation=get_knn k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=true"
+	@echo "  make benchmark_tests data_structure=BallTree dataset=sift operation=insert k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) cap_dataset=true"
+	@echo "  make benchmark_tests data_structure=BruteForce dataset=MNIST operation=delete k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS)"
+	@echo ""
+	@echo "For more details on each parameter, refer to the 'benchmark_tests' section in the Makefile."
+
+# Clean up any generated files (if any)
+.PHONY: clean
+clean:
+	rm -rf results

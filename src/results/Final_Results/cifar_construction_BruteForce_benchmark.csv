@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1,trial_2,trial_3
+2.710905259785553,cifar,construction,BruteForce,2.7265409845858812,2.9817606322467327,2.4244141625240445

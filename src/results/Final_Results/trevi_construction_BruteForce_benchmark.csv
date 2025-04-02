@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1,trial_2,trial_3
+19.803725549951196,trevi,construction,BruteForce,16.406206291168928,22.44887218531221,20.556098173372447

@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1,trial_2,trial_3
+4.630441200919449,trevi,construction,KDTree,4.977753089740872,4.571175339631736,4.342395173385739
