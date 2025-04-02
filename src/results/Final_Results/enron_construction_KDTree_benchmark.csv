@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1,trial_2,trial_3
+4.417915176600218,enron,construction,KDTree,4.555351932533085,4.348951176740229,4.349442420527339

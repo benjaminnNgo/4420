@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1,trial_2,trial_3
+7.452551716628174,enron,construction,BruteForce,6.5518647423014045,8.607766347005963,7.198024060577154

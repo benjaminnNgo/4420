@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1,trial_2,trial_3
+10.592980658325056,sun,construction,KDTree,10.941239221952856,10.33594492264092,10.501757830381393

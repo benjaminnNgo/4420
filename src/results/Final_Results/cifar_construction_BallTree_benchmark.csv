@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1
+297.33553363662213,cifar,construction,BallTree,297.33553363662213

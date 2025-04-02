@@ -1,0 +1,88 @@
+
+
+
+# Add a new target for parallel execution
+# Add a new target for parallel execution with additional environment cleanup
+.PHONY: run_all_parallel
+run_all_parallel: generate_commands
+    @TIMESTAMP=$$(cat .current_benchmark_timestamp); \
+    CMD_FILE=.benchmark_commands_$$TIMESTAMP.txt; \
+    echo "Running $$(wc -l < $$CMD_FILE) commands in parallel with $(PARALLEL_JOBS) jobs..."; \
+    cat $$CMD_FILE | xargs -P $(PARALLEL_JOBS) -I {} bash -c "cd $(PWD) && source $(CONDA_PREFIX)/etc/profile.d/conda.sh && conda activate $(CONDA_ENV) && unset PYTHONPATH && unset PYTHONHOME && export PYTHONNOUSERSITE=1 && {}"; \
+    rm -f $$CMD_FILE .current_benchmark_timestamp
+
+# Add a target to verify Python configuration
+.PHONY: verify_python
+verify_python:
+	@echo "Testing Python configuration:"
+	@echo "Current directory: $(PWD)"
+	@echo "Python executable: $$(which python)"
+	@echo "Python version: $$(python --version)"
+	@echo "NumPy version: $$(python -c 'import numpy; print(numpy.__version__)')"
+	@echo "NumPy path: $$(python -c 'import numpy; print(numpy.__path__)')"
+	@echo "Python sys.path: $$(python -c 'import sys; print(sys.path)')"
+	@echo "Testing that NumPy imports correctly:"
+	@python -c 'import numpy as np; print("NumPy imported successfully")'
+
+.PHONY: test_parallel_numpy
+test_parallel_numpy:
+	@echo "Testing NumPy imports in parallel..."
+	@for i in $$(seq 1 10); do \
+		echo "Test $$i:"; \
+		xargs -P 2 -I {} bash -c "cd $(PWD) && unset PYTHONPATH && unset PYTHONHOME && export PYTHONNOUSERSITE=1 && python -c 'import numpy; print(\"NumPy $$i imported successfully\")'"; \
+	done
+
+# Helper target to generate all commands into a file
+.PHONY: generate_commands
+generate_commands:
+	@TIMESTAMP=$$(date +%s); \
+	CMD_FILE=.benchmark_commands_$$TIMESTAMP.txt; \
+	rm -f $$CMD_FILE; \
+	echo "Generating benchmark commands..."; \
+	for data_structure in $(DATA_STRUCTURES); do \
+		for dataset in $(DIF_SIZE_DATASETS); do \
+			for operation in $(OPERATIONS); do \
+				echo "$(MAKE) benchmark_tests data_structure=$$data_structure dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES)" >> $$CMD_FILE; \
+			done; \
+		done; \
+	done; \
+	for data_structure in $(DATA_STRUCTURES); do \
+		for dataset in $(DIF_DIM_DATASETS); do \
+			for operation in $(OPERATIONS); do \
+				echo "$(MAKE) benchmark_tests data_structure=$$data_structure dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET)" >> $$CMD_FILE; \
+			done; \
+		done; \
+	done; \
+	echo "Generated $$(wc -l < $$CMD_FILE) benchmark commands."; \
+	echo $$TIMESTAMP > .current_benchmark_timestamp
+
+# Similarly for the other targets
+.PHONY: run_dif_size_parallel
+run_dif_size_parallel:
+	@TIMESTAMP=$$(date +%s); \
+	CMD_FILE=.benchmark_commands_$$TIMESTAMP.txt; \
+	rm -f $$CMD_FILE; \
+	for data_structure in $(DATA_STRUCTURES); do \
+		for dataset in $(DIF_SIZE_DATASETS); do \
+			for operation in $(OPERATIONS); do \
+				echo "$(MAKE) benchmark_tests data_structure=$$data_structure dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES)" >> $$CMD_FILE; \
+			done; \
+		done; \
+	done; \
+	cat $$CMD_FILE | xargs -P $(PARALLEL_JOBS) -I {} bash -c "{}"; \
+	rm -f $$CMD_FILE
+
+.PHONY: run_dif_dim_parallel
+run_dif_dim_parallel:
+	@TIMESTAMP=$$(date +%s); \
+	CMD_FILE=.benchmark_commands_$$TIMESTAMP.txt; \
+	rm -f $$CMD_FILE; \
+	for data_structure in $(DATA_STRUCTURES); do \
+		for dataset in $(DIF_DIM_DATASETS); do \
+			for operation in $(OPERATIONS); do \
+				echo "$(MAKE) benchmark_tests data_structure=$$data_structure dataset=$$dataset operation=$$operation k=$(K) trials=$(TRIALS) num_operations=$(NUM_OPERATIONS) radius=$(RADIUS) use_max_queries=$(USE_MAX_QUERIES) cap_dataset=$(CAP_DATASET)" >> $$CMD_FILE; \
+			done; \
+		done; \
+	done; \
+	cat $$CMD_FILE | xargs -P $(PARALLEL_JOBS) -I {} bash -c "{}"; \
+	rm -f $$CMD_FILE

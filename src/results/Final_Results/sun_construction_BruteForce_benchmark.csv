@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1,trial_2,trial_3
+4.717245743299524,sun,construction,BruteForce,4.079494682140648,4.969823642633855,5.102418905124068

@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1
+970.7988870767877,enron,construction,BallTree,970.7988870767877

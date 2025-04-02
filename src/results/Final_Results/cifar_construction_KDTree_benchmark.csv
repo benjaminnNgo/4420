@@ -1,0 +1,2 @@
+avg_time,data_name,operation,tree,trial_1,trial_2,trial_3
+7.462599314749241,cifar,construction,KDTree,8.092374767176807,7.864229376427829,6.431193800643086
