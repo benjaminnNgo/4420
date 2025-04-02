@@ -1,6 +1,7 @@
 # Respository Architecture
 
 We you clone the project from github, your file structure will be looked as follows:
+
 ```
 4420
 ├── README.md
@@ -15,6 +16,11 @@ We you clone the project from github, your file structure will be looked as foll
     │   ├── __init__.py
     │   └── data_utils.py
     ├── datasets
+    ├── graphs
+        ├── dif_dim_graphs
+        ├── dif_size_graphs
+    ├── results
+        ├── Final_Results
     ├── scripts
     ├── test_cases
     └── tree
@@ -27,9 +33,11 @@ We you clone the project from github, your file structure will be looked as foll
 ```
 
 ### `document`
+
 Contain the documentation of project including instructions on how to set up the environment, our proposal and our report.
 
 ### `src/dataloader/data_utils.py`
+
 Load and preprocess benchmark datasets for experiment
 
 ### `datasets`
@@ -41,8 +49,9 @@ To run experiments, datasets are needed to download in this folder. All datasets
 Directory contains `python `scripts to run experiments
 
 ### `test_cases`
+
 Directory contains simple test cases to verify our implementation
 
 ### `tree`
 
-Implementation of K-D tree, Ball* Tree and Bruteforce approach can be found in `KDTree.py`,`BallTree.py` , `BruteForce.py` respectively.
+Implementation of K-D tree, Ball\* Tree and Bruteforce approach can be found in `KDTree.py`,`BallTree.py` , `BruteForce.py` respectively.

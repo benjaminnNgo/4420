@@ -34,6 +34,17 @@ class KDTreeNode:
         self.coordinate = coordinate
         self.right = right
         self.left = left
+
+    def __sizeof__(self):
+        size = sys.getsizeof(self.__dict__)
+        size += sys.getsizeof(self.coordinate)
+        if hasattr(self.coordinate, "nbytes"):
+            size += self.coordinate.nbytes
+        if self.left is not None:
+            size += self.left.__sizeof__()  # Call __sizeof__ recursively, not sys.getsizeof()
+        if self.right is not None:
+            size += self.right.__sizeof__()  # Call __sizeof__ recursively, not sys.getsizeof()
+        return size
         
 class KDTree(GeometricDataStructure):
     r"""KD-tree from the `"Multidimensional binary search trees used for associative searching" <https://doi.org/10.1145/361002.361007>`
@@ -51,6 +62,12 @@ class KDTree(GeometricDataStructure):
         super().__init__(dimension,points,dist_function)
         self.root = self._construct_tree(points=points, depth=0)
 
+    def __sizeof__(self):
+        size = sys.getsizeof(self.__dict__)
+        size += sys.getsizeof(self.dimension)
+        if self.root is not None:
+            size += self.root.__sizeof__()  # Call __sizeof__ recursively, not sys.getsizeof()
+        return size
 
     def _construct_tree(self,
                         points: List[np.ndarray], 

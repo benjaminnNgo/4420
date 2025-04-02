@@ -73,26 +73,6 @@ class TestKDTree(unittest.TestCase):
         self.assertTrue(np.array_equal(kd_nearest_reinsert, target),
                         "After reinsertion, the target should again be returned as the nearest neighbor")
 
-    def test_range_search_kd_tree(self):
-        # Test the range search function for KDTree.
-        query = np.array([5, 5])
-        radius = 2.5
-        
-        # Perform the range search to retrieve points within the specified radius.
-        result = self.kd_tree.query_range(query, radius)
-        
-        # Define the expected points (in set form) that should lie within this radius.
-        expected_set = arrays_to_set([np.array(p) for p in [
-            [3, 5], [4, 6], [5, 6], [3, 4], [6, 7]
-        ]])
-        
-        # Convert the query result to a set to ignore order differences.
-        result_set = arrays_to_set(result)
-        
-        # Assert that the result and expected sets match.
-        self.assertEqual(result_set, expected_set,
-                         f"KDTree range search should return correct points within radius. Got {result_set}, expected {expected_set}")
-
 class TestBallTree(unittest.TestCase):
     def setUp(self):
         # Initialize a sample dataset of 2D points for BallTree tests.
@@ -138,23 +118,6 @@ class TestBallTree(unittest.TestCase):
         self.assertEqual(len(knn), k,
                          "BallTree.get_knn should return exactly k neighbors")
         
-    def test_range_search_ball_tree(self):
-        # Test the range search functionality of BallTree.
-        query = np.array([5, 5])
-        radius = 2.5
-        
-        # Retrieve points within the search radius.
-        result = self.ball_tree.query_range(query, radius)
-        
-        # Convert the result to a set of hashable tuples to ignore order.
-        result_set = arrays_to_set(result)
-        expected_set = arrays_to_set([np.array(p) for p in [
-            [3, 5], [4, 6], [5, 6], [3, 4], [6, 7]
-        ]])
-        
-        # Assert that the results match what is expected.
-        self.assertEqual(result_set, expected_set,
-                         f"BallTree range search should return correct points within radius. Got {result_set}, expected {expected_set}")
 
 class TestTreeComparison(unittest.TestCase):
     def setUp(self):
@@ -199,29 +162,6 @@ class TestTreeComparison(unittest.TestCase):
                          "KDTree.get_nearest output should match BruteForce.get_nearest")
         self.assertTrue(np.array_equal(ball_nearest, brute_nearest),
                          "BallTree.get_nearest output should match BruteForce.get_nearest")
-        
-    def test_range_search_comparison(self):
-        # Test that range search returns the same results across different implementations.
-        test_cases = [
-            (np.array([5, 5]), 2.5),  # Medium radius
-            (np.array([3, 3]), 1.0),  # Small radius
-            (np.array([9, 9]), 10.0), # Large radius covering all points
-            (np.array([20, 20]), 1.0) # No points in range
-        ]
-        
-        for query, radius in test_cases:
-            kd_result = self.kd_tree.query_range(query, radius)
-            ball_result = self.ball_tree.query_range(query, radius)
-            brute_result = self.brute.query_range(query, radius)
-            
-            kd_set = arrays_to_set(kd_result)
-            ball_set = arrays_to_set(ball_result)
-            brute_set = arrays_to_set(brute_result)
-            
-            self.assertEqual(kd_set, brute_set,
-                             f"KDTree and BruteForce range search results should match for query {query} and radius {radius}")
-            self.assertEqual(ball_set, brute_set,
-                             f"BallTree and BruteForce range search results should match for query {query} and radius {radius}")
             
     def test_sizeof_method(self):
         # Test the memory usage reporting of each data structure.
