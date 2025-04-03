@@ -1,6 +1,6 @@
 # Geometric Data Structures: From Theory to Application
 
-This project implements 2 geometric data structures, KD-tree[1] and Ball* Tree[2] and benchmarks their performance on various datasets. For a complete discussion about our project, please see our [report](./document/4420_report.pdf).
+This project implements 2 geometric data structures, KD-tree[1] and Ball* Tree[2] and benchmarks their performance on various datasets. For a complete discussion about our project, please see our [Report](./document/Report.pdf).
 
 
 ## Installation
